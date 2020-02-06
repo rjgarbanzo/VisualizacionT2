@@ -1,0 +1,54 @@
+---
+title: "Tarea2_Ricardo_Garbanzo"
+author: "Ricardo Garbanzo"
+date: "February 5, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. [20 puntos] Utilizando los datos de la tabla encuesta_brexit.csv replique el siguiente grafico y explique una a una las lineas de codigo utilizadas:
+
+```{r}
+datos <- read.csv("encuesta_brexit.csv", sep = ",", header = T)
+library(ggplot2)
+datos$Fecha <- as.Date(datos$Fecha, "%d/%m/%y")
+
+g <- ggplot(data = datos, mapping = aes(x = datos$Fecha)) +
+  geom_smooth(mapping = aes(y = datos$Si, color = "Si")) +
+  geom_smooth(mapping = aes(y = datos$No, color = "No")) +
+  geom_point(mapping = aes(y = datos$Si, color = "Si")) +
+  geom_point(mapping = aes(y = datos$No, color = "No")) +
+  scale_color_manual(values = c("#f85f73","#07689f"), name = "Respuesta") +
+  scale_x_date(date_breaks = "6 month") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+g
+
+```
+
+`datos <- read.csv("encuesta_brexit.csv", sep = ",", header = T)` Carga de datos
+
+`library(ggplot2)` Carga de libreria
+
+`datos$Fecha <- as.Date(datos$Fecha, "%d/%m/%y")` Transformacion de variable fecha en tipo DATE
+
+`g <- ggplot(data = datos, mapping = aes(x = datos$Fecha)) +` Asignacion de plot y datos en eje x
+
+ ` geom_smooth(mapping = aes(y = datos$Si, color = "Si")) +` graficar intervalo de confianza para variable si
+
+  `geom_smooth(mapping = aes(y = datos$No, color = "No")) +`graficar intervalo de confianza para variable NO
+
+  `geom_point(mapping = aes(y = datos$Si, color = "Si")) +` graficar observaciones de si en eje Y con punto
+
+  `geom_point(mapping = aes(y = datos$No, color = "No")) +`graficar observaciones de no en eje Y con punto
+
+  `scale_color_manual(values = c("#07689f", "#f85f73"), name = "Respuesta") +` Asignacion de colores para variables si y no
+
+  `scale_x_date(date_breaks = "6 month") +` se define una escala de forma manual para la variable fecha en el eje X
+
+  `theme_minimal() +` Se aplica un tema para el fondo del gráfico
+
+  `theme(legend.position = "bottom")` se configura la leyenda del grafico en la parte inferior.
