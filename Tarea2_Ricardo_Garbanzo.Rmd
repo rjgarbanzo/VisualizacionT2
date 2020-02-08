@@ -52,3 +52,21 @@ g
   `theme_minimal() +` Se aplica un tema para el fondo del gráfico
 
   `theme(legend.position = "bottom")` se configura la leyenda del grafico en la parte inferior.
+  
+  
+  
+  
+  
+# 2. [20 puntos] Utilizando los datos de la tabla IDH cantonal 2014.csv realice lo siguiente:
+
+a) Seleccione una provincia.
+b) Filtre los datos para la provincia seleccionada.
+c) Realice un mapa de la provincia seleccionada en el que se pueda observar el IDC representado por colores, ademas una etiqueta debe indicar el nombre del canton asi como el valor exacto del IDC.
+
+
+
+
+
+
+
+  
