@@ -20,9 +20,13 @@ g
 library(dplyr)
 library(sf)
 library(scales)
+library(ggplot2)
+library(ggrepel)
+
+
+#IDH <- read.csv("IDH_cantonal_2014.csv", sep = ",")
 
 cantones <- read_sf("geo_data/geo_data/cantones/cantones.shp")
-
 IDH <- IDH_cantonal_2014
 to_upper <- function(x) toupper(chartr("áéíóúÁÉÍÓÚ", "aeiouAEIOU", x))
 IDH$Cantón <- to_upper(IDH$Cantón)
@@ -30,23 +34,47 @@ names(IDH)[1] <- "Posicion"
 names(IDH)[2] <- "Canton"
 IDH <- IDH[-1]
 
-
 cantones <- left_join(x = cantones, y = IDH, by = c("cant_nom1" = "Canton"))
-
 cantones <- subset(cantones, cantones$prov_nom1 == "SAN JOSE")
 
 
+centros <- st_centroid(cantones)
+cantones <- cbind(cantones,st_coordinates(st_centroid(centros$geometry)))
+
+
+
+
 ggplot(cantones, aes(fill = cantones$IDH)) +
-  geom_sf(color = "black", size = .1) +
+  geom_sf(color = "green", size = .1) +
+  geom_label_repel(
+    mapping = aes(x = X, y = Y, label = paste(cantones$cant_nom2,"-",cantones$IDH)),
+    size = 3,
+    fill = "white",
+    label.r = 0)
   theme_void() +
   scale_fill_distiller(labels = comma,
                        trans = "log10",
                        name = "Cantidad de delitos reportados",
                        direction = 1) +
-  labs(title = "Distribución de los delitos reportados en Costa Rica",
-       caption = "Fuente: Organismos De Investigación Judicial") +
-  theme(legend.key.height = unit(1,"cm"),
-        plot.title = element_text(hjust = .5, size = 12))
+  labs(title = "Indice de criminalidad") +
+  theme(legend.key.height = unit(1,"cm"), plot.title = element_text(hjust = .5, size = 12))
 
 
+  
+  
+  
+  
+  ggplot(cantones, mapping = aes(fill = cantones$IDH)) +
+    geom_sf(color = "green", size = .1) +
+    geom_label_repel(
+      mapping = aes(x = X, y = Y, label = paste(cantones$cant_nom2,"-",cantones$IDH)),
+      size = 3, fill = "white", label.r = 0) +
+  theme_void() +
+    scale_fill_viridis_c(labels = comma,
+                       trans = "log10",
+                       name = "IDH",
+                       direction = 1) +
+    labs(title = "Indice -  Provincia de San Jose") +
+    theme(legend.position = "bottom", legend.key.width = unit(2,"cm"), 
+          plot.title = element_text(hjust = .5, size = 14))
 
