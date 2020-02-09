@@ -146,9 +146,8 @@ provincias <- cbind(provincias, st_coordinates(st_centroid(centros$geometry)))
 
 g1 <- ggplot(mapa_asaltos, mapping = aes(fill = conteo)) +
   geom_sf(color = "black", size = .1) +
-  geom_label_repel(
-    mapping = aes(x = X, y = Y, label = paste(mapa_asaltos$prov_nom2)),
-    size = 4, fill = "white", label.r = 0) +
+  geom_label_repel(mapping = aes(x = provincias$X, y = provincias$Y, label = paste(mapa_asaltos$prov_nom2)),
+    size = 3, fill = "white", label.r = 0) +
   theme_void() +
   scale_fill_viridis_c(labels = comma,
                        trans = "log10",
@@ -181,3 +180,13 @@ grid.arrange(grobs = gl,
 ```
 
   
+
+
+# 4. [30 puntos] Imagine que se le solicita realizar un informe sobre la violencia domestica en Costa Rica, utilizando los datos de las tablas violencia.csv desarrolle como minimo 4 graficos que le permitan representar e interpretar el fenomeno y su evolucion durante los ultimos a~nos, realice el trabajo tomando en cuenta que este debe estar pensado para su publicacion.
+
+
+```{r}
+datos_violencia <- read.csv("violencia.csv", sep = ";")
+datos_violencia
+```
+

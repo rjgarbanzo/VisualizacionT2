@@ -114,9 +114,8 @@ provincias <- cbind(provincias, st_coordinates(st_centroid(centros$geometry)))
 
 g1 <- ggplot(mapa_asaltos, mapping = aes(fill = conteo)) +
   geom_sf(color = "black", size = .1) +
-  geom_label_repel(
-    mapping = aes(x = X, y = Y, label = paste(mapa_asaltos$prov_nom2)),
-    size = 4, fill = "white", label.r = 0) +
+  geom_label_repel(mapping = aes(x = provincias$X, y = provincias$Y, label = paste(mapa_asaltos$prov_nom2)),
+    size = 3, fill = "white", label.r = 0) +
   theme_void() +
   scale_fill_viridis_c(labels = comma,
                        trans = "log10",
@@ -127,6 +126,10 @@ g1 <- ggplot(mapa_asaltos, mapping = aes(fill = conteo)) +
         plot.title = element_text(hjust = .5, size = 14))
 
 
+
+
+
+################################################################################
 
 
 
@@ -141,7 +144,7 @@ g2 <- ggplot(data = conteo_victimas,
   theme(text = element_text(size = 14, face = "bold"))
 
 
-
+#################################################################################
 
 gl <- list(g1, g2)
 grid.arrange(grobs = gl,
@@ -159,4 +162,39 @@ grid.arrange(grobs = gl,
 
 
 
-  
+
+
+
+
+
+
+
+
+
+###################################################################################
+###################################################################################
+#EJERCICIO 4
+
+datos_violencia <- read.csv("violencia.csv", sep = ";")
+names(datos_violencia)[1] <- "Provincia"
+names(datos_violencia)[2] <- "Canton"
+
+to_upper <- function(x) toupper(chartr("áéíóúÁÉÍÓÚ", "aeiouAEIOU", x))
+datos_violencia$Provincia <- to_upper(datos_violencia$Provincia)
+datos_violencia$Canton <- to_upper(datos_violencia$Canton)
+datos_violencia$Distrito <- to_upper(datos_violencia$Distrito)
+
+
+
+provincias <- read_sf("geo_data/geo_data/provincias/provincias.shp")
+cantones <- read_sf("geo_data/geo_data/cantones/cantones.shp")
+distritos <- read_sf("geo_data/geo_data/distritos/distritos.shp")
+
+
+
+provincias_violencia <- left_join(x = provincias, y = datos_violencia, by = c("prov_nom1" = "Provincia"))  
+cantones_violencia <- left_join(x = cantones, y = datos_violencia, by = c("cant_nom1" = "Canton"))
+distritos_violencia <- left_join(x = distritos, y = datos_violencia, by = c("dist_nom1" = "Distrito"))  
+
+centros <- st_centroid(provincias)
+provincias <- cbind(provincias, st_coordinates(st_centroid(centros$geometry)))
