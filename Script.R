@@ -78,3 +78,85 @@ ggplot(cantones, aes(fill = cantones$IDH)) +
     theme(legend.position = "bottom", legend.key.width = unit(2,"cm"), 
           plot.title = element_text(hjust = .5, size = 14))
 
+
+  
+###################################################################################
+library(forcats)
+library(ggplot2)
+library(dplyr)
+library(sf)
+library(scales)
+library(ggplot2)
+library(ggrepel)
+library(egg)
+library(grid)  
+    
+OIJ2010 <- read.csv("OIJ_estadisticas_2010.csv", sep = ",")
+OIJ2011 <- read.csv("OIJ_estadisticas_2011.csv", sep = ",")
+OIJ2012 <- read.csv("OIJ_estadisticas_2012.csv", sep = ",")
+OIJ2013 <- read.csv("OIJ_estadisticas_2013.csv", sep = ",")
+OIJ2014 <- read.csv("OIJ_estadisticas_2014.csv", sep = ",")
+OIJ2015 <- read.csv("OIJ_estadisticas_2015.csv", sep = ",")
+
+
+provincias <- read_sf("geo_data/geo_data/provincias/provincias.shp")
+asaltos <- rbind(OIJ2010, OIJ2011, OIJ2012, OIJ2013, OIJ2014, OIJ2015)
+asaltos <- asaltos[-c(2,3,4,6,7,8,10,11,12)]
+conteo_victimas <- count(asaltos, asaltos$SubVictima, asaltos$Provincia, name = "conteo")
+asaltos_provincias <- count(asaltos, asaltos$Delito, asaltos$Provincia, name = "conteo")
+mapa_asaltos <- left_join(x = provincias, y = asaltos_provincias, by = c("prov_nom1" = "asaltos$Provincia"))
+
+
+centros <- st_centroid(provincias)
+provincias <- cbind(provincias, st_coordinates(st_centroid(centros$geometry)))
+
+
+
+g1 <- ggplot(mapa_asaltos, mapping = aes(fill = conteo)) +
+  geom_sf(color = "black", size = .1) +
+  geom_label_repel(
+    mapping = aes(x = X, y = Y, label = paste(mapa_asaltos$prov_nom2)),
+    size = 4, fill = "white", label.r = 0) +
+  theme_void() +
+  scale_fill_viridis_c(labels = comma,
+                       trans = "log10",
+                       name = "Cantidad de Asaltos",
+                       direction = 1) +
+  labs(title = "Cantidad de asaltos por provincia - Costa Rica") +
+  theme(legend.position = "bottom", legend.key.width = unit(2,"cm"), 
+        plot.title = element_text(hjust = .5, size = 14))
+
+
+
+
+
+
+g2 <- ggplot(data = conteo_victimas, 
+             mapping = aes(y = conteo_victimas$conteo,
+                           x = conteo_victimas$`asaltos$Provincia`)) +
+  geom_col() +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Provincias", y = "Cantidad de Asaltos") +
+  theme(text = element_text(size = 14, face = "bold"))
+
+
+
+
+gl <- list(g1, g2)
+grid.arrange(grobs = gl,
+             nrow = 1,
+             widths = c(2,2),
+             layout_matrix = rbind(c(1, 2),c(1, 2)),
+             top = textGrob("Indice de desarrollo social de los cantones del GAM",
+                            gp = gpar(fontface = 2,
+                                      fontsize = 16),
+                            hjust = 0.5,
+                            x = 0.5)
+)
+
+
+
+
+
+  
