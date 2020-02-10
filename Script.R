@@ -175,6 +175,17 @@ grid.arrange(grobs = gl,
 ###################################################################################
 #EJERCICIO 4
 
+library(forcats)
+library(ggplot2)
+library(dplyr)
+library(sf)
+library(scales)
+library(ggplot2)
+library(ggrepel)
+library(egg)
+library(grid)  
+
+
 datos_violencia <- read.csv("violencia.csv", sep = ";")
 names(datos_violencia)[1] <- "Provincia"
 names(datos_violencia)[2] <- "Canton"
@@ -190,11 +201,59 @@ provincias <- read_sf("geo_data/geo_data/provincias/provincias.shp")
 cantones <- read_sf("geo_data/geo_data/cantones/cantones.shp")
 distritos <- read_sf("geo_data/geo_data/distritos/distritos.shp")
 
+#AÑOS
+violencia_Provincia_2016 <- datos_violencia[c(1,4)]
+violencia_Provincia_2016 <- na.omit(violencia_Provincia_2016);names(violencia_Provincia_2016)[2] <- "Total"
+violencia_Provincia_2017 <- datos_violencia[c(1,5)]
+violencia_Provincia_2017 <- na.omit(violencia_Provincia_2017);names(violencia_Provincia_2017)[2] <- "Total"
+violencia_Provincia_2018 <- datos_violencia[c(1,6)]
+violencia_Provincia_2018 <- na.omit(violencia_Provincia_2018);names(violencia_Provincia_2018)[2] <- "Total"
+
+violencia_Canton_2016 <- datos_violencia[c(2,4)]
+violencia_Canton_2016 <- na.omit(violencia_Canton_2016);names(violencia_Canton_2016)[2] <- "Total"
+violencia_Canton_2017 <- datos_violencia[c(2,5)]
+violencia_Canton_2017 <- na.omit(violencia_Canton_2017);names(violencia_Canton_2017)[2] <- "Total"
+violencia_Canton_2018 <- datos_violencia[c(2,6)]
+violencia_Canton_2018 <- na.omit(violencia_Canton_2018);names(violencia_Canton_2018)[2] <- "Total"
+
+violencia_Distrito_2016 <- datos_violencia[c(3,4)]
+violencia_Distrito_2016 <- na.omit(violencia_Distrito_2016);names(violencia_Distrito_2016)[2] <- "Total"
+violencia_Distrito_2017 <- datos_violencia[c(3,5)]
+violencia_Distrito_2017 <- na.omit(violencia_Distrito_2017);names(violencia_Distrito_2017)[2] <- "Total"
+violencia_Distrito_2018 <- datos_violencia[c(3,6)]
+violencia_Distrito_2018 <- na.omit(violencia_Distrito_2018);names(violencia_Distrito_2018)[2] <- "Total"
+
+#BIND 
+total_Provincia <- bind_rows(violencia_Provincia_2016,violencia_Provincia_2017,violencia_Provincia_2018)
+total_Canton <- bind_rows(violencia_Canton_2016,violencia_Canton_2017,violencia_Canton_2018)
+total_Distrito<- bind_rows(violencia_Distrito_2016,violencia_Distrito_2017,violencia_Distrito_2018)
 
 
-provincias_violencia <- left_join(x = provincias, y = datos_violencia, by = c("prov_nom1" = "Provincia"))  
-cantones_violencia <- left_join(x = cantones, y = datos_violencia, by = c("cant_nom1" = "Canton"))
-distritos_violencia <- left_join(x = distritos, y = datos_violencia, by = c("dist_nom1" = "Distrito"))  
 
-centros <- st_centroid(provincias)
-provincias <- cbind(provincias, st_coordinates(st_centroid(centros$geometry)))
+#SUMA
+sum_provincia <- aggregate(total_Provincia$Total, 
+                           by=list(Provincia=total_Provincia$Provincia), FUN=sum)
+
+sum_Canton <- aggregate(total_Canton$Total, 
+                           by=list(Canton=total_Canton$Canton), FUN=sum)
+
+sum_Distrito <- aggregate(total_Distrito$Total, 
+                           by=list(Distrito=total_Distrito$Distrito), FUN=sum)
+
+
+
+#JOIN 
+provincias_violencia <- left_join(x = provincias, y = sum_provincia, by = c("prov_nom1" = "Provincia"))  
+cantones_violencia <- left_join(x = cantones, y = sum_Canton, by = c("cant_nom1" = "Canton"))
+distritos_violencia <- left_join(x = distritos, y = sum_Distrito, by = c("dist_nom1" = "Distrito"))  
+
+
+
+#CREACION DE CENTROS
+centros <- st_centroid(provincias_violencia)
+provincias_violencia <- cbind(provincias_violencia, st_coordinates(st_centroid(centros$geometry)))
+
+## GRAFICO
+ggplot(provincias_violencia, mapping = aes(fill = conteo)) +
+  geom_sf(color = "black", size = .1)
+
