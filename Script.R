@@ -250,10 +250,96 @@ distritos_violencia <- left_join(x = distritos, y = sum_Distrito, by = c("dist_n
 
 
 #CREACION DE CENTROS
-centros <- st_centroid(provincias_violencia)
-provincias_violencia <- cbind(provincias_violencia, st_coordinates(st_centroid(centros$geometry)))
+centrosP <- st_centroid(provincias_violencia)
+provincias_violencia <- cbind(provincias_violencia, st_coordinates(st_centroid(centrosP$geometry)))
 
-## GRAFICO
-ggplot(provincias_violencia, mapping = aes(fill = conteo)) +
-  geom_sf(color = "black", size = .1)
+centrosC <- st_centroid(cantones_violencia)
+cantones_violencia <- cbind(cantones_violencia, st_coordinates(st_centroid(centrosC$geometry)))
+
+centrosD <- st_centroid(distritos_violencia)
+distritos_violencia <- cbind(distritos_violencia, st_coordinates(st_centroid(centrosD$geometry)))
+
+## GRAFICOS
+ggplot(provincias_violencia, mapping = aes(fill = x)) +
+  geom_sf(color = "black", size = .1)+
+  # Agregamo las etiquetas
+  geom_label_repel(
+    mapping = aes(x = provincias_violencia$X, y = provincias_violencia$Y, 
+                  label = provincias_violencia$prov_nom1),
+    size = 2,
+    fill = "white",
+    label.r = 0) +
+  theme_void() +
+  # Modificamos la pelate de color
+  scale_fill_viridis_c(labels = comma,
+                       trans = "log10",
+                       name = "Cantidad de delitos reportados",
+                       direction = 1)
+
+
+
+
+ggplot(cantones_violencia, mapping = aes(fill = x)) +
+  geom_sf(color = "black", size = .1)+
+  # Agregamo las etiquetas
+  # geom_label_repel(
+  #   mapping = aes(x = cantones_violencia$X, y = cantones_violencia$Y, 
+  #                 label = cantones_violencia$prov_nom1),
+  #   size = 2,
+  #   fill = "white",
+  #   label.r = 0) +
+  theme_void() +
+  # Modificamos la pelate de color
+  scale_fill_viridis_c(labels = comma,
+                       trans = "log10",
+                       name = "Cantidad de delitos reportados",
+                       direction = 1)
+
+
+
+
+
+ggplot(distritos_violencia, mapping = aes(fill = x)) +
+  geom_sf(color = "black", size = .1)+
+  # Agregamo las etiquetas
+  # geom_label_repel(
+  #   mapping = aes(x = cantones_violencia$X, y = cantones_violencia$Y, 
+  #                 label = cantones_violencia$prov_nom1),
+  #   size = 2,
+  #   fill = "white",
+  #   label.r = 0) +
+  theme_void() +
+  # Modificamos la pelate de color
+  scale_fill_viridis_c(labels = comma,
+                       trans = "log10",
+                       name = "Cantidad de delitos reportados",
+                       direction = 1)
+
+
+
+#########################################################
+GAM <- c("San José", "Escazú", "Desamparados", "Aserrí",
+         "Mora", "Goicoechea", "Santa Ana", "Alajuelita",
+         "Vázquez de Coronado", "Tibás", "Moravia","Montes de Oca" ,
+         "Curridabat","Heredia", "Barva", "Santo Domingo",
+         "Santa Bárbara", "San Rafael", "San Isidro", "Belén",
+         "Flores", "San Pablo","Cartago", "Paraíso", "La Unión",
+         "Alvarado", "Oreamuno" , "El Guarco","Alajuela","Atenas",
+         "Poás")
+mapa_GAM <- subset(cantones_violencia, cantones_violencia$cant_nom2 %in% GAM)
+
+ggplot(data = mapa_GAM,mapping = aes(y = mapa_GAM$cant_nom2, 
+                                     x = mapa_GAM$x)) +
+  geom_point(size = 3) +
+  geom_segment(aes(x = 68,
+                   y = cant_nom2,
+                   xend = x,
+                   yend = cant_nom2)) +
+  
+  theme_minimal() +
+  labs(x = "Índice de progreso social", y = "") +
+  theme(text = element_text(size = 14, face = "bold"))
+
+
+
 
